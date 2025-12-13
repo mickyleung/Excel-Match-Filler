@@ -1,0 +1,72 @@
+name: 建置Windows EXE / Build Windows EXE (Excel匹配工具)
+
+on:
+  push:
+    tags:
+      - 'v*'  # 標籤推送觸發 / Trigger on tag push (e.g., v1.0.0)
+  workflow_dispatch:  # 手動觸發 / Manual trigger
+
+jobs:
+  build-windows-exe:
+    runs-on: windows-latest
+    steps:
+      - name: 拉取程式碼 / Checkout repository code
+        uses: actions/checkout@v4
+
+      - name: 設定Python 3.10環境 / Set up Python 3.10
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.10'
+          cache: 'pip'  # 快取依賴 / Cache pip dependencies
+
+      - name: 安裝依賴套件 / Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r src/requirements.txt
+          pip install pyinstaller openpyxl xlrd pandas
+
+      - name: 建置EXE檔案 / Build EXE with PyInstaller
+        run: |
+          cd src
+          pyinstaller -F -w ^
+          --hidden-import openpyxl ^
+          --hidden-import xlrd ^
+          --hidden-import pandas ^
+          --hidden-import tkinter ^
+          --clean ^
+          --name "Excel數據匹配工具_${{ github.ref_name }}" ^
+          excel_matcher.py
+        shell: cmd
+
+      - name: 驗證EXE檔案 / Verify EXE file
+        run: |
+          if exist src\dist\Excel數據匹配工具_${{ github.ref_name }}.exe (
+            echo "EXE建置成功！/ EXE build success!"
+            dir src\dist
+          ) else (
+            echo "EXE建置失敗！/ EXE build failed!"
+            exit 1
+          )
+        shell: cmd
+
+      - name: 上傳EXE成品 / Upload EXE artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: Excel-Match-Filler-EXE-${{ github.ref_name }}
+          path: src/dist/Excel數據匹配工具_${{ github.ref_name }}.exe
+          retention-days: 30  # 成品保留天數 / Artifact retention days
+
+      - name: 建立Release並上傳EXE / Create GitHub Release and upload EXE
+        if: startsWith(github.ref, 'refs/tags/')
+        uses: softprops/action-gh-release@v2
+        with:
+          name: 版本 ${{ github.ref_name }} / Release ${{ github.ref_name }}
+          body: |
+            ## Excel數據匹配工具 / Excel Data Matching Tool ${{ github.ref_name }}
+            ### 更新內容 / Update Content:
+            - 支援繁中/英文雙語切換 / Support Traditional Chinese/English bilingual switch
+            - 支援多列聯合匹配 / Support multi-column joint matching
+            - 修復已知問題 / Fix known issues (see commit history)
+          files: src/dist/Excel數據匹配工具_${{ github.ref_name }}.exe
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
