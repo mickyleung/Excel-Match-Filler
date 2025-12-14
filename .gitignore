@@ -1,0 +1,58 @@
+# Python cache files
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+env/
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+MANIFEST
+
+# PyInstaller artifacts
+*.spec
+build/
+dist/
+
+# Virtual environments
+venv/
+env/
+*.venv
+env.bak/
+venv.bak/
+
+# IDE configuration
+.idea/
+.vscode/
+*.swp
+*.swo
+.DS_Store
+.coverage
+*.log
+
+# Excel test files
+*.xlsx
+*.xls
+!docs/screenshots/*.xlsx
+
+# Windows temporary files
+Thumbs.db
+ehthumbs.db
+Desktop.ini
+$RECYCLE.BIN/
+
+# Icon files (optional, if not needed)
+# *.ico
